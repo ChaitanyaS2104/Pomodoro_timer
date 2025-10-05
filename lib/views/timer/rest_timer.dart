@@ -1,14 +1,15 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro/config/app_colors.dart';
+import 'package:pomodoro/models/pokemon_family.dart';
 
 class RestTimer extends StatefulWidget {
   final String taskName;
   final int currentPomodoro;
   final int totalPomodoros;
-  final int restDuration; // Time in minutes
+  final int restDuration;
+  final PokemonFamily pokemonFamily;
 
   const RestTimer({
     super.key,
@@ -16,6 +17,7 @@ class RestTimer extends StatefulWidget {
     required this.currentPomodoro,
     required this.totalPomodoros,
     required this.restDuration,
+    required this.pokemonFamily,
   });
 
   @override
@@ -26,19 +28,10 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
   late int _initialTimeInSeconds;
   AnimationController? _controller;
 
-  final List<String> _sleepingPixelPets = [
-    'assets/shelgon.png',
-    'assets/bulbasaur.png',
-    'assets/larvitar.png',
-  ];
-
-  late String _selectedPetAsset;
-
   @override
   void initState() {
     super.initState();
     _initialTimeInSeconds = widget.restDuration * 60;
-    _selectRandomPet();
 
     _controller =
         AnimationController(
@@ -57,12 +50,6 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
     _startTimer();
   }
 
-  void _selectRandomPet() {
-    final random = Random();
-    _selectedPetAsset =
-        _sleepingPixelPets[random.nextInt(_sleepingPixelPets.length)];
-  }
-
   @override
   void dispose() {
     _controller?.dispose();
@@ -70,7 +57,6 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
   }
 
   void _toggleTimer() {
-    // --- FIX: Wrap in setState to update the icon ---
     setState(() {
       if (_controller?.isAnimating ?? false) {
         _stopTimer();
@@ -91,12 +77,7 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
   }
 
   void _restartTimer() {
-    _controller?.stop();
     _controller?.value = 1.0;
-    // We call setState here as well to ensure the icon updates if paused
-    setState(() {
-      _startTimer();
-    });
   }
 
   void _skipRest() {
@@ -111,6 +92,13 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
     final minutes = (timeLeftInSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (timeLeftInSeconds % 60).toString().padLeft(2, '0');
     return '$minutes : $seconds';
+  }
+
+  String get _currentPokemonImage {
+    int imageIndex =
+        (widget.currentPomodoro - 1) %
+        widget.pokemonFamily.evolutionImages.length;
+    return widget.pokemonFamily.evolutionImages[imageIndex];
   }
 
   @override
@@ -163,15 +151,22 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
                       strokeWidth: 12,
                       backgroundColor: Colors.white.withOpacity(0.1),
                       valueColor: const AlwaysStoppedAnimation<Color>(
-                        AppColors.highlightRed,
+                        AppColors.accent,
                       ),
                       strokeCap: StrokeCap.round,
                     ),
                   ),
+                  // --- FIX: Applied cropping fix ---
                   SizedBox(
                     width: 120,
                     height: 120,
-                    child: Image.asset(_selectedPetAsset, fit: BoxFit.contain),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8.0),
+                      child: Image.asset(
+                        _currentPokemonImage,
+                        fit: BoxFit.cover, // This crops the image
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -259,7 +254,7 @@ class _RestTimerState extends State<RestTimer> with TickerProviderStateMixin {
                     ],
                   ),
                   child: Text(
-                    'Take rest PixelPet is sleeping!',
+                    'Take rest PixelPet is evolving!',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.pixelifySans(
                       color: AppColors.background,

@@ -1,7 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:pomodoro/views/home_screen.dart'; 
 import 'package:pomodoro/views/login_or_register.dart';
+import 'package:pomodoro/views/task_log.dart';
 
 class AuthGate extends StatelessWidget {
   const AuthGate({super.key});
@@ -17,8 +17,8 @@ class AuthGate extends StatelessWidget {
             return const LoginOrRegister();
           }
 
-          // User is logged in
-          return const HomeScreen();
+          // User is logged in, show the main task setup screen
+          return const TaskSetupScreen();
         },
       ),
     );

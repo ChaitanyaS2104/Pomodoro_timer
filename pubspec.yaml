@@ -13,8 +13,8 @@ dependencies:
   firebase_core: ^3.1.1 
   firebase_auth: ^5.1.1 
   shared_preferences: ^2.2.3 
-
   cupertino_icons: ^1.0.8
+  cloud_firestore: 
 
 dev_dependencies:
   flutter_test:
@@ -29,4 +29,14 @@ flutter:
     - assets/pomodoro_logo.png
     - assets/shelgon.png
     - assets/bulbasaur.png
+    - assets/ivysaur.png
+    - assets/venusaur.png
+    - assets/venusaur-mega.png
     - assets/larvitar.png
+    - assets/pupitar.png
+    - assets/tyranitar.png
+    - assets/tyranitar-mega.png
+    - assets/bagon.png
+    - assets/shelgon.png
+    - assets/salamence.png
+    - assets/salamence-mega.png
