@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pomodoro/theme/app_colors.dart';
 import 'package:pomodoro/views/login_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // (Your main.dart setup should still be the same, assuming MyApp is defined
 // with the ScaffoldBackgroundColor and base fontFamily)
 
 class RegistrationScreen extends StatefulWidget {
-  const RegistrationScreen({super.key});
+  final void Function()? onTap;
+  const RegistrationScreen({super.key, required this.onTap});
 
   @override
   State<RegistrationScreen> createState() => _RegistrationScreenState();
@@ -107,11 +109,43 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement registration logic
-                    print('Register button tapped!');
-                    print('Email: ${_emailController.text}');
-                    print('Password: ${_passwordController.text}');
+                  // Inside the Login Button's onPressed:
+                  onPressed: () async {
+                    final String email = _emailController.text.trim();
+                    final String password = _passwordController.text.trim();
+
+                    // Always a good idea to check for empty fields first
+                    if (email.isEmpty || password.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Please enter both email and password.',
+                          ),
+                        ),
+                      );
+                      return; // Stop the function
+                    }
+
+                    try {
+                      // Use the correct function for registration
+                      await FirebaseAuth.instance
+                          .createUserWithEmailAndPassword(
+                            email: email,
+                            password: password,
+                          );
+
+                      // After successful registration, you can navigate to the next screen
+                      // or show a success message.
+                      print('Registration successful!');
+                    } on FirebaseAuthException catch (e) {
+                      // Handle specific Firebase errors (like email already in use)
+                      print('Failed to register: ${e.message}');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('Failed to register: ${e.message}'),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,
@@ -147,12 +181,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const LoginScreen()),
-                      );
-                    },
+                    onTap: widget.onTap,
                     child: Text(
                       'Login',
                       style: GoogleFonts.pixelifySans(

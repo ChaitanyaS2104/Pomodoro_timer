@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pomodoro/views/registration_screen.dart';
 import 'package:pomodoro/theme/app_colors.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pomodoro/views/auth_gate.dart';
 
 class Onboard extends StatelessWidget {
   const Onboard({super.key});
@@ -96,13 +97,22 @@ class OnboardingScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity, // Make button take full width
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const RegistrationScreen(),
-                      ),
-                    );
+                  onPressed: () async {
+                    // Get the shared preferences instance
+                    final prefs = await SharedPreferences.getInstance();
+
+                    // Set the flag to true so this screen won't show again
+                    await prefs.setBool('onboarding_complete', true);
+
+                    // Navigate to the AuthGate.
+                    // pushReplacement prevents the user from going back to the onboarding screen.
+                    if (context.mounted) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (context) => const AuthGate(),
+                        ),
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.accent,

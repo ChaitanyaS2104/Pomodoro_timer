@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pomodoro/views/registration_screen.dart'; // Import the registration screen
-import 'package:pomodoro/theme/app_colors.dart'; // Import your app's colors
+import 'package:pomodoro/theme/app_colors.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key});
+  final void Function()? onTap;
+  const LoginScreen({super.key, required this.onTap});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -32,7 +33,6 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 80), // Top spacing
-
               // ## Title Section ##
               Text(
                 'POMODORO',
@@ -61,7 +61,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'EMAIL',
-                  style: GoogleFonts.pixelifySans(color: AppColors.primaryText, fontSize: 16),
+                  style: GoogleFonts.pixelifySans(
+                    color: AppColors.primaryText,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -77,7 +80,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'PASSWORD',
-                  style: GoogleFonts.pixelifySans(color: AppColors.primaryText, fontSize: 16),
+                  style: GoogleFonts.pixelifySans(
+                    color: AppColors.primaryText,
+                    fontSize: 16,
+                  ),
                 ),
               ),
               const SizedBox(height: 8),
@@ -92,14 +98,41 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: Implement login logic
-                    print('Login button tapped!');
-                    print('Email: ${_emailController.text}');
-                    print('Password: ${_passwordController.text}');
+                  onPressed: () async {
+                    try {
+                      final String email = _emailController.text.trim();
+                      final String password = _passwordController.text.trim();
+
+                      // Validate the inputs are not empty
+                      if (email.isEmpty || password.isEmpty) {
+                        throw FirebaseAuthException(
+                          code: 'fields-empty',
+                          message: 'Please enter both email and password.',
+                        );
+                      }
+
+                      // Sign in the user with Firebase
+                      await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: email,
+                        password: password,
+                      );
+
+                      // On success, the AuthGate will automatically navigate to the HomeScreen.
+                      // We don't need to do anything here.
+                    } on FirebaseAuthException catch (e) {
+                      // If an error occurs, show a message to the user
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(e.message ?? 'Failed to log in'),
+                          ),
+                        );
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.highlightRed, // Use red color from AppColors
+                    backgroundColor:
+                        AppColors.highlightRed, // Use red color from AppColors
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(4),
@@ -132,17 +165,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      // Navigate to the RegistrationScreen
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegistrationScreen()),
-                      );
-                    },
+                    onTap: widget.onTap,
                     child: Text(
                       'Register',
                       style: GoogleFonts.pixelifySans(
-                        color: AppColors.highlightRed, // Use red color from AppColors
+                        color: AppColors
+                            .highlightRed, // Use red color from AppColors
                         fontSize: 16,
                         decoration: TextDecoration.underline,
                         decorationColor: AppColors.highlightRed,
@@ -177,7 +205,10 @@ class _LoginScreenState extends State<LoginScreen> {
         hintStyle: GoogleFonts.pixelifySans(color: AppColors.secondaryText),
         filled: true,
         fillColor: AppColors.inputFill,
-        contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 14,
+          horizontal: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: AppColors.inputBorder, width: 1.5),
           borderRadius: BorderRadius.circular(4),
