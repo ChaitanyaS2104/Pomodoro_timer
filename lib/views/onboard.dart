@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pomodoro/theme/app_colors.dart';
+import 'package:pomodoro/config/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:pomodoro/views/auth_gate.dart';
 

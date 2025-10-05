@@ -27,3 +27,6 @@ flutter:
 
   assets:
     - assets/pomodoro_logo.png
+    - assets/shelgon.png
+    - assets/bulbasaur.png
+    - assets/larvitar.png
